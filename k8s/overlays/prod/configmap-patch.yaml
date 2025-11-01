@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shopping-mart-config
+data:
+  DEBUG: "False"
+  VITE_API_BASE_URL: "https://api.shopping-mart.example.com/api/v1"
