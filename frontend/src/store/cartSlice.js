@@ -1,13 +1,32 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+// Load cart from localStorage
+const loadCartFromStorage = () => {
+  try {
+    const serializedCart = localStorage.getItem('shopping_cart');
+    if (serializedCart === null) {
+      return { items: [], customer: null, discount: 0, taxRate: 0 };
+    }
+    return JSON.parse(serializedCart);
+  } catch (err) {
+    console.error('Error loading cart from storage:', err);
+    return { items: [], customer: null, discount: 0, taxRate: 0 };
+  }
+};
+
+// Save cart to localStorage
+const saveCartToStorage = (state) => {
+  try {
+    const serializedCart = JSON.stringify(state);
+    localStorage.setItem('shopping_cart', serializedCart);
+  } catch (err) {
+    console.error('Error saving cart to storage:', err);
+  }
+};
+
 const cartSlice = createSlice({
   name: 'cart',
-  initialState: {
-    items: [],
-    customer: null,
-    discount: 0,
-    taxRate: 0,
-  },
+  initialState: loadCartFromStorage(),
   reducers: {
     addToCart: (state, action) => {
       const product = action.payload;
@@ -21,9 +40,11 @@ const cartSlice = createSlice({
           quantity: 1,
         });
       }
+      saveCartToStorage(state);
     },
     removeFromCart: (state, action) => {
       state.items = state.items.filter(item => item.product_id !== action.payload);
+      saveCartToStorage(state);
     },
     updateQuantity: (state, action) => {
       const { product_id, quantity } = action.payload;
@@ -31,20 +52,25 @@ const cartSlice = createSlice({
       if (item && quantity > 0) {
         item.quantity = quantity;
       }
+      saveCartToStorage(state);
     },
     clearCart: (state) => {
       state.items = [];
       state.customer = null;
       state.discount = 0;
+      saveCartToStorage(state);
     },
     setCustomer: (state, action) => {
       state.customer = action.payload;
+      saveCartToStorage(state);
     },
     setDiscount: (state, action) => {
       state.discount = action.payload;
+      saveCartToStorage(state);
     },
     setTaxRate: (state, action) => {
       state.taxRate = action.payload;
+      saveCartToStorage(state);
     },
   },
 });

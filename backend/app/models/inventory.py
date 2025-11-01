@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, ForeignKey, DateTime, Date
+from sqlalchemy import Column, Integer, Float, ForeignKey, DateTime, Date, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .base import Base
@@ -18,3 +18,8 @@ class Inventory(Base):
     # Relationships
     product = relationship("Product", back_populates="inventory")
     store = relationship("Store", back_populates="inventory")
+    
+    # Unique constraint to prevent duplicate inventory records
+    __table_args__ = (
+        UniqueConstraint('product_id', 'store_id', name='uix_product_store'),
+    )

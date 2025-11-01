@@ -114,11 +114,37 @@ def delete_product(
     current_user: User = Depends(require_role([UserRole.ADMIN]))
 ):
     """Delete a product"""
+    from app.models.sale import SaleLineItem
+    from app.models.inventory import Inventory
+    
     db_product = db.query(Product).filter(Product.product_id == product_id).first()
     if not db_product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product not found"
+        )
+    
+    # Check if product has sales history
+    has_sales = db.query(SaleLineItem).filter(
+        SaleLineItem.product_id == product_id
+    ).first()
+    
+    if has_sales:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete product with sales history. Consider marking as inactive instead."
+        )
+    
+    # Check if product has inventory
+    has_inventory = db.query(Inventory).filter(
+        Inventory.product_id == product_id,
+        Inventory.quantity > 0
+    ).first()
+    
+    if has_inventory:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete product with existing inventory. Adjust inventory to zero first."
         )
     
     db.delete(db_product)

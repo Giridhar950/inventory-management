@@ -26,9 +26,9 @@ def get_sales_summary(
     
     # Default to last 30 days if no dates provided
     if not start_date:
-        start_date = datetime.now() - timedelta(days=30)
+        start_date = datetime.utcnow() - timedelta(days=30)
     if not end_date:
-        end_date = datetime.now()
+        end_date = datetime.utcnow()
     
     query = query.filter(Sale.date >= start_date, Sale.date <= end_date)
     
@@ -136,7 +136,7 @@ def get_daily_sales(
     current_user: User = Depends(get_current_user)
 ):
     """Get daily sales for the last N days"""
-    start_date = datetime.now() - timedelta(days=days)
+    start_date = datetime.utcnow() - timedelta(days=days)
     
     query = db.query(
         func.date(Sale.date).label("sale_date"),
