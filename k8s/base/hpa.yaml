@@ -3,7 +3,6 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: backend-hpa
-  namespace: shopping-mart
   labels:
     app: shopping-mart
     component: backend
@@ -50,7 +49,6 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: frontend-hpa
-  namespace: shopping-mart
   labels:
     app: shopping-mart
     component: frontend
