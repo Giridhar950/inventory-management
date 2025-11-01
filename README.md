@@ -107,6 +107,7 @@ A comprehensive, production-grade shopping mart inventory management system with
 
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
+- **Orchestration**: Kubernetes (K8s) manifests included
 - **Web Server**: Uvicorn (ASGI)
 - **Reverse Proxy**: Nginx (production)
 - **Version Control**: Git
@@ -224,7 +225,51 @@ docker-compose down
 docker-compose up -d --build
 ```
 
-### Option 2: Manual Installation
+### Option 2: Kubernetes (Recommended for Production)
+
+**Deploy to any Kubernetes cluster** (Minikube, GKE, EKS, AKS, etc.)
+
+```bash
+# Build and push images to your registry
+docker build -t your-registry/shopping-mart-backend:v1.0.0 backend/
+docker build -t your-registry/shopping-mart-frontend:v1.0.0 frontend/
+docker push your-registry/shopping-mart-backend:v1.0.0
+docker push your-registry/shopping-mart-frontend:v1.0.0
+
+# Deploy to Kubernetes
+chmod +x k8s/deploy.sh
+./k8s/deploy.sh dev apply  # For development
+./k8s/deploy.sh prod apply # For production
+
+# Access via port-forward
+kubectl port-forward svc/frontend-service 3000:3000 -n shopping-mart
+kubectl port-forward svc/backend-service 8000:8000 -n shopping-mart
+```
+
+**?? Full Kubernetes documentation:** See [KUBERNETES.md](KUBERNETES.md) for complete guide
+
+**Features:**
+- ? Production-ready manifests with Kustomize
+- ? Development & Production overlays
+- ? Horizontal Pod Autoscaling (HPA)
+- ? Ingress with SSL/TLS support
+- ? Persistent storage for PostgreSQL & Redis
+- ? Health checks & resource limits
+- ? One-command deployment script
+
+### Option 3: Podman Compose (Docker Alternative)
+
+**For users who prefer Podman:**
+
+```bash
+# Use Podman Compose instead of Docker Compose
+podman-compose up -d
+podman-compose exec backend python init_db.py
+```
+
+**?? Full Podman documentation:** See [PODMAN_SETUP.md](PODMAN_SETUP.md)
+
+### Option 4: Manual Installation
 
 #### Backend Setup
 

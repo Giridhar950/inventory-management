@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: shopping-mart-prod
+
+bases:
+  - ../../base
+
+namePrefix: prod-
+
+commonLabels:
+  environment: production
+
+# Production-specific patches
+patchesStrategicMerge:
+  - replica-patch.yaml
+  - security-patch.yaml
+
+configMapGenerator:
+  - name: shopping-mart-config
+    behavior: merge
+    literals:
+      - DEBUG=False
+      - VITE_API_BASE_URL=https://api.shopping-mart.example.com/api/v1
+
+images:
+  - name: shopping-mart-backend
+    newName: your-registry.io/shopping-mart-backend
+    newTag: v1.0.0
+  - name: shopping-mart-frontend
+    newName: your-registry.io/shopping-mart-frontend
+    newTag: v1.0.0

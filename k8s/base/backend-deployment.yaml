@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: shopping-mart
+  labels:
+    app: shopping-mart
+    component: backend
+spec:
+  replicas: 2  # Multiple replicas for high availability
+  selector:
+    matchLabels:
+      app: shopping-mart
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: shopping-mart
+        component: backend
+    spec:
+      initContainers:
+      # Wait for PostgreSQL to be ready
+      - name: wait-for-postgres
+        image: busybox:latest
+        command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo waiting for postgres; sleep 2; done;']
+      # Wait for Redis to be ready
+      - name: wait-for-redis
+        image: busybox:latest
+        command: ['sh', '-c', 'until nc -z redis-service 6379; do echo waiting for redis; sleep 2; done;']
+      containers:
+      - name: backend
+        image: shopping-mart-backend:latest  # Replace with your image registry
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-service:5432/$(POSTGRES_DB)"
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: shopping-mart-config
+              key: REDIS_URL
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: shopping-mart-secrets
+              key: SECRET_KEY
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: shopping-mart-config
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: shopping-mart-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: shopping-mart-config
+              key: POSTGRES_DB
+        - name: APP_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: shopping-mart-config
+              key: APP_NAME
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: shopping-mart-config
+              key: DEBUG
+        - name: ALLOWED_ORIGINS
+          value: "http://localhost:3000,http://frontend-service:3000"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: shopping-mart
+  labels:
+    app: shopping-mart
+    component: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: shopping-mart
+    component: backend
