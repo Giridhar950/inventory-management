@@ -3,25 +3,20 @@ kind: Kustomization
 
 namespace: shopping-mart-dev
 
-bases:
+resources:
   - ../../base
 
 namePrefix: dev-
 
-commonLabels:
-  environment: development
+labels:
+  - pairs:
+      environment: development
 
 # Development-specific patches
-patchesStrategicMerge:
-  - replica-patch.yaml
-  - resource-patch.yaml
-
-configMapGenerator:
-  - name: shopping-mart-config
-    behavior: merge
-    literals:
-      - DEBUG=True
-      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+patches:
+  - path: replica-patch.yaml
+  - path: resource-patch.yaml
+  - path: configmap-patch.yaml
 
 images:
   - name: shopping-mart-backend
