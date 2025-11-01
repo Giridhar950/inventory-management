@@ -17,6 +17,7 @@ resources:
   - hpa.yaml
   - job-init-db.yaml
 
-commonLabels:
-  app: shopping-mart
-  managed-by: kustomize
+labels:
+  - pairs:
+      app: shopping-mart
+      managed-by: kustomize
