@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-database
+  namespace: shopping-mart
+  labels:
+    app: shopping-mart
+    component: init
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    metadata:
+      labels:
+        app: shopping-mart
+        component: init
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+      # Wait for PostgreSQL to be ready
+      - name: wait-for-postgres
+        image: busybox:latest
+        command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo waiting for postgres; sleep 2; done;']
+      containers:
+      - name: init-db
+        image: shopping-mart-backend:latest  # Replace with your image registry
+        command: ["python", "init_db.py"]
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-service:5432/$(POSTGRES_DB)"
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: shopping-mart-config
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: shopping-mart-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: shopping-mart-config
+              key: POSTGRES_DB
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: shopping-mart-config
+              key: REDIS_URL
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: shopping-mart-secrets
+              key: SECRET_KEY

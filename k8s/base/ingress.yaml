@@ -1,0 +1,87 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shopping-mart-ingress
+  namespace: shopping-mart
+  labels:
+    app: shopping-mart
+  annotations:
+    # Nginx Ingress Controller
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    
+    # Cert Manager (for automatic SSL)
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # CORS settings
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  ingressClassName: nginx  # Change based on your ingress controller
+  tls:
+  - hosts:
+    - shopping-mart.example.com
+    - api.shopping-mart.example.com
+    secretName: shopping-mart-tls
+  rules:
+  # Frontend
+  - host: shopping-mart.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 3000
+  # Backend API
+  - host: api.shopping-mart.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8000
+---
+# Alternative: Single domain with path-based routing
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shopping-mart-ingress-single
+  namespace: shopping-mart
+  labels:
+    app: shopping-mart
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - shopping-mart.example.com
+    secretName: shopping-mart-tls-single
+  rules:
+  - host: shopping-mart.example.com
+    http:
+      paths:
+      # API routes
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8000
+      # Frontend routes
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 3000
