@@ -6,8 +6,6 @@ namespace: shopping-mart-prod
 resources:
   - ../../base
 
-namePrefix: prod-
-
 labels:
   - pairs:
       environment: production

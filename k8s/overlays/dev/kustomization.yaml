@@ -6,8 +6,6 @@ namespace: shopping-mart-dev
 resources:
   - ../../base
 
-namePrefix: dev-
-
 labels:
   - pairs:
       environment: development

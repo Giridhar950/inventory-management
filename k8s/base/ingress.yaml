@@ -2,7 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: shopping-mart-ingress
-  namespace: shopping-mart
   labels:
     app: shopping-mart
   annotations:
@@ -53,7 +52,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: shopping-mart-ingress-single
-  namespace: shopping-mart
   labels:
     app: shopping-mart
   annotations:
