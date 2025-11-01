@@ -10,7 +10,7 @@ This directory contains Kubernetes manifests for deploying the Shopping Mart Sys
 k8s/
 ??? base/                          # Base Kubernetes manifests
 ?   ??? namespace.yaml             # Namespace definition
-?   ??? configmap.yaml             # Configuration
+?   ??? kustomization.yaml         # Kustomize configuration (with configMapGenerator)
 ?   ??? secret.yaml                # Secrets
 ?   ??? postgres-pvc.yaml          # PostgreSQL storage
 ?   ??? redis-pvc.yaml             # Redis storage
@@ -91,18 +91,7 @@ kubectl apply -k k8s/overlays/prod
 kubectl delete -k k8s/overlays/dev
 ```
 
-### Option 3: Manual kubectl apply
-
-```bash
-# Apply base manifests
-kubectl apply -f k8s/base/
-
-# Or apply individually
-kubectl apply -f k8s/base/namespace.yaml
-kubectl apply -f k8s/base/configmap.yaml
-kubectl apply -f k8s/base/secret.yaml
-# ... etc
-```
+> **?? Note:** Do not use `kubectl apply -f k8s/base/` directly. The base directory uses Kustomize features like `configMapGenerator` that require using Kustomize via the `-k` flag or the deployment script. Always deploy through an overlay (dev or prod).
 
 ---
 
