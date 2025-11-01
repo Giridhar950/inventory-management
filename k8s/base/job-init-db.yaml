@@ -19,10 +19,12 @@ spec:
       # Wait for PostgreSQL to be ready
       - name: wait-for-postgres
         image: busybox:latest
+        imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo waiting for postgres; sleep 2; done;']
       containers:
       - name: init-db
         image: shopping-mart-backend:latest  # Replace with your image registry
+        imagePullPolicy: IfNotPresent
         command: ["python", "init_db.py"]
         env:
         - name: DATABASE_URL
