@@ -73,7 +73,7 @@ spec:
               name: shopping-mart-config
               key: DEBUG
         - name: ALLOWED_ORIGINS
-          value: "http://localhost:3000,http://frontend-service:3000"
+          value: "http://localhost:3000,http://localhost:5173,http://frontend-service:3000,https://shopping-mart.example.com"
         resources:
           requests:
             memory: "256Mi"
